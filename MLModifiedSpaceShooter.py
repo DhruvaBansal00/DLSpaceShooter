@@ -475,217 +475,11 @@ def game():
 
 
 # Class Module
-class SpaceMenu:
-
-    # Define the initalize self options
-    def __init__(self, *options):
-
-        self.options = options
-        self.x = 0
-        self.y = 0
-        self.font = pygame.font.Font(None, 32)
-        self.option = 0
-        self.width = 1
-        self.color = [0, 0, 0]
-        self.hcolor = [0, 0, 0]
-        self.height = len(self.options) * self.font.get_height()
-        for o in self.options:
-            text = o[0]
-            ren = self.font.render(text, 1, (0, 0, 0))
-            if ren.get_width() > self.width:
-                self.width = ren.get_width()
-
-    # Draw the menu
-    def draw(self, surface):
-        i = 0
-        for o in self.options:
-            if i == self.option:
-                clr = self.hcolor
-            else:
-                clr = self.color
-            text = o[0]
-            ren = self.font.render(text, 1, clr)
-            if ren.get_width() > self.width:
-                self.width = ren.get_width()
-            surface.blit(ren, (self.x, self.y + i * self.font.get_height()))
-            i += 1
-
-    # Menu Input
-    def update(self, events):
-        for e in events:
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_DOWN:
-                    self.option += 1
-                if e.key == pygame.K_UP:
-                    self.option -= 1
-                if e.key == pygame.K_RETURN:
-                    self.options[self.option][1]()
-        if self.option > len(self.options) - 1:
-            self.option = 0
-        if self.option < 0:
-            self.option = len(self.options) - 1
-
-    # Position Menu
-    def set_pos(self, x, y):
-        self.x = x
-        self.y = y
-
-    # Font Style
-    def set_font(self, font):
-        self.font = font
-
-    # Highlight Color
-    def set_highlight_color(self, color):
-        self.hcolor = color
-
-    # Font Color
-    def set_normal_color(self, color):
-        self.color = color
-
-    # Font position
-    def center_at(self, x, y):
-        self.x = x - (self.width / 2)
-        self.y = y - (self.height / 2)
 
 
-def missionMenu():
-    # Arena
-    arena = Arena()
-    arena = pygame.sprite.RenderPlain((arena))
-
-    # Title for Option Menu
-    menuTitle = SpaceMenu(
-        ["Space Shooter"])
-
-    # Option Menu Text
-    instructions = SpaceMenu(
-        [""],
-        ["Aliens from the planet Solaris have entered earth's sub"],
-        [""],
-        ["space and plan to destroy the Earth! You are our last hope!"],
-        [""],
-        ["Navigate your space cruiser with the arrow keys and use"],
-        [""],
-        ["the space bar to fire the proton laser. Use the left CTRL"],
-        [""],
-        ["key to shoot a torpedo. Be careful, you have a limited"],
-        [""],
-        ["supply. Kill as many enemies as you can!"],
-        [""],
-        [""],
-        ["                   PRESS ESC TO RETURN                    "])
-
-    # Title
-    menuTitle.center_at(150, 150)
-    menuTitle.set_font(pygame.font.Font("game/data/fonts/planet5.ttf", 48))
-    menuTitle.set_highlight_color((0, 255, 0))
-
-    # Title Center
-    instructions.center_at(440, 350)
-
-    # Menu Font
-    instructions.set_font(pygame.font.Font("game/data/fonts/arial.ttf", 22))
-
-    # Highlight Color
-    instructions.set_normal_color((0, 255, 0))
-
-    # Set Clock
-    clock = pygame.time.Clock()
-    keepGoing = True
-
-    while keepGoing:
-        clock.tick(30)
-        # input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                keepGoing = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    keepGoing = False
-        # Draw
-        screen.blit(background, (0, 0))
-        arena.update()
-        arena.draw(screen)
-        menuTitle.draw(screen)
-        instructions.draw(screen)
-        pygame.display.flip()
-
-
-def aboutMenu():
-    # Arena
-    arena = Arena()
-    arena = pygame.sprite.RenderPlain((arena))
-
-    # About Menu Text
-    # Title for Option Menu
-    menuTitle = SpaceMenu(
-        ["Space Shooter"])
-
-    info = SpaceMenu(
-        [""],
-        ["Space Shooter Beta"],
-        [""],
-        ["Devloped by the Monty Pythons."],
-        [""],
-        ["Student's from Mr. Raza's DPT 110 class"],
-        [""],
-        [""],
-        ["      PRESS ESC TO RETURN            "])
-
-    # About Title Font color, alignment, and font type
-    menuTitle.center_at(150, 150)
-    menuTitle.set_font(pygame.font.Font("game/data/fonts/planet5.ttf", 48))
-    menuTitle.set_highlight_color((0, 255, 0))
-
-    # About Menu Text Alignment
-    info.center_at(400, 310)
-
-    # About Menu Font
-    info.set_font(pygame.font.Font("game/data/fonts/arial.ttf", 28))
-
-    # About Menu Font Color
-    info.set_normal_color((0, 255, 0))
-
-    # Set Clock
-    clock = pygame.time.Clock()
-    keepGoing = True
-
-    while keepGoing:
-        clock.tick(30)
-        # input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                keepGoing = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    keepGoing = False
-        # Draw
-        screen.blit(background, (0, 0))
-        arena.update()
-        arena.draw(screen)
-        menuTitle.draw(screen)
-        info.draw(screen)
-        pygame.display.flip()
 
 
 # Functions
-
-def option1():
-    game()
-
-
-def option2():
-    missionMenu()
-
-
-def option3():
-    aboutMenu()
-
-
-def option4():
-    pygame.quit()
-    sys.exit()
-
 
 # Main
 def main():
@@ -694,17 +488,6 @@ def main():
     arena = pygame.sprite.RenderPlain((arena))
 
     game()
-
-    # Title
-    menuTitle.center_at(150, 150)
-    menuTitle.set_font(pygame.font.Font("game/data/fonts/planet5.ttf", 48))
-    menuTitle.set_highlight_color((0, 255, 0))
-
-    # Menu settings
-    menu.center_at(400, 320)
-    menu.set_font(pygame.font.Font("game/data/fonts/arial.ttf", 32))
-    menu.set_highlight_color((0, 255, 0))
-    menu.set_normal_color((0, 85, 0))
 
     clock = pygame.time.Clock()
     keepGoing = True
@@ -715,8 +498,7 @@ def main():
         # Events
         events = pygame.event.get()
 
-        # Update Menu
-        menu.update(events)
+
 
         # Quit Event
         for e in events:
@@ -728,8 +510,6 @@ def main():
         screen.blit(background, (0, 0))
         arena.update()
         arena.draw(screen)
-        menu.draw(screen)
-        menuTitle.draw(screen)
         pygame.display.flip()
 
 
