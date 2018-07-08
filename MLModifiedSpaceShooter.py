@@ -38,6 +38,7 @@ def load_image(name, colorkey=None):
 # Sprites
 
 # This class controls the arena background
+
 class Arena(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -176,7 +177,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Laser Collisions
         if pygame.sprite.groupcollide(enemySprites, laserSprites, 1, 1):
-            explosionSprites.add(EnemyExplosion(self.rect.center))
+            #explosionSprites.add(EnemyExplosion(self.rect.center))
             score.score += 10
 
         # Bomb Collisions
@@ -186,7 +187,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Bomb Explosion Collisions
         if pygame.sprite.groupcollide(enemySprites, bombExplosionSprites, 1, 0):
-            explosionSprites.add(EnemyExplosion(self.rect.center))
+            #explosionSprites.add(EnemyExplosion(self.rect.center))
             score.score += 10
 
     def reset(self):
@@ -379,19 +380,19 @@ def game():
                     player.dx = -10
                 elif event.key == K_RIGHT:
                     player.dx = 10
-                elif event.key == K_UP:
-                    player.dy = -10
-                elif event.key == K_DOWN:
-                    player.dy = 10
+                #elif event.key == K_UP:
+                #    player.dy = -10
+                #elif event.key == K_DOWN:
+                #    player.dy = 10
             elif event.type == KEYUP:
                 if event.key == K_LEFT:
                     player.dx = 0
                 elif event.key == K_RIGHT:
                     player.dx = 0
-                elif event.key == K_UP:
-                    player.dy = 0
-                elif event.key == K_DOWN:
-                    player.dy = 0
+               # elif event.key == K_UP:
+                #    player.dy = 0
+                #elif event.key == K_DOWN:
+                #    player.dy = 0
 
         # Update and draw on the screen
 
