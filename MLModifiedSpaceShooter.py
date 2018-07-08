@@ -19,7 +19,6 @@ background = background.convert()
 background.fill((0, 0, 0))
 
 
-
 # Load Images
 def load_image(name, colorkey=None):
     fullname = os.path.join('game/data', name)
@@ -34,6 +33,7 @@ def load_image(name, colorkey=None):
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey, RLEACCEL)
     return image, image.get_rect()
+
 
 # Sprites
 
@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         self.reset()
         self.lasertimer = 0
         self.lasermax = 5
-        #self.ammo = 100
+        # self.ammo = 100
         self.bombamount = 1
         self.bombtimer = 0
         self.bombmax = 10
@@ -77,9 +77,9 @@ class Player(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
             self.lasertimer = self.lasertimer + 1
-            if self.lasertimer == self.lasermax: #self.ammo > 0:
+            if self.lasertimer == self.lasermax:  # self.ammo > 0:
                 laserSprites.add(Laser(self.rect.midtop))
-                #self.ammo = #self.ammo - 1
+                # self.ammo = #self.ammo - 1
                 self.lasertimer = 0
 
         # Fire the bomb
@@ -279,7 +279,7 @@ class Score(pygame.sprite.Sprite):
 
     def update(self):
         self.text = "Shield: %d                        Score: %d                        Torpedo: %d" % (
-        self.shield, self.score, self.bomb)
+            self.shield, self.score, self.bomb)
         self.image = self.font.render(self.text, 1, (0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.center = (400, 20)
@@ -693,16 +693,7 @@ def main():
     arena = Arena()
     arena = pygame.sprite.RenderPlain((arena))
 
-    # Defines menu, option functions, and option display. For example,
-    # Changing "Start" to "Begin" will display Begin, instead of start.
-    menuTitle = SpaceMenu(
-        ["Space Shooter"])
-
-    menu = SpaceMenu(
-        ["Start", option1],
-        ["Misson", option2],
-        ["About", option3],
-        ["Quit", option4])
+    game()
 
     # Title
     menuTitle.center_at(150, 150)
