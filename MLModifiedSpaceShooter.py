@@ -1,22 +1,107 @@
 # Modified from Space Shooter by Tyler Gray
 # https://www.pygame.org/project-Space+Shooter-1292-.html
 
-# Import
-import os, sys, pygame, random
+import os
+import pygame
+import random
 from pygame.locals import *
 
-os.environ['SDL_VIDEO_CENTERED'] = "1"
+FPS = 30
+SCREENWIDTH  = 800
+SCREENHEIGHT = 600
+
+# os.environ['SDL_VIDEO_CENTERED'] = "1"
 pygame.init()
+FPSCLOCK = pygame.time.Clock()
 pygame.display.set_caption("Space Shooter")
 icon = pygame.image.load("game/Space Shooter.png")
 icon = pygame.display.set_icon(icon)
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 pygame.mouse.set_visible(0)
 
 # Background
 background = pygame.Surface(screen.get_size())
 background = background.convert()
 background.fill((0, 0, 0))
+
+
+class GameState:
+    def __init__(self):
+        # Game Objects
+        global player
+        player = Player()
+        global score
+        score = Score()
+
+        # Player/Enemy
+        self.playerSprite = pygame.sprite.RenderPlain(player)
+
+        global enemySprites
+        enemySprites = pygame.sprite.RenderPlain(())
+        enemySprites.add(Enemy(200))
+        enemySprites.add(Enemy(300))
+        enemySprites.add(Enemy(400))
+
+        # Projectiles
+        global laserSprites
+        laserSprites = pygame.sprite.RenderPlain(())
+
+        global bombSprites
+        bombSprites = pygame.sprite.RenderPlain(())
+        global enemyLaserSprites
+        enemyLaserSprites = pygame.sprite.RenderPlain(())
+
+        # Powerups
+        global bombPowerups
+        bombPowerups = pygame.sprite.RenderPlain(())
+        global shieldPowerups
+        shieldPowerups = pygame.sprite.RenderPlain(())
+
+        # Special FX
+        self.shieldSprites = pygame.sprite.RenderPlain(())
+
+        global explosionSprites
+        explosionSprites = pygame.sprite.RenderPlain(())
+
+        global bombExplosionSprites
+        bombExplosionSprites = pygame.sprite.RenderPlain(())
+
+        # Score/and game over
+        self.scoreSprite = pygame.sprite.Group(score)
+        self.gameOverSprite = pygame.sprite.RenderPlain(())
+
+        # Arena
+        self.arena = Arena()
+        self.arena = pygame.sprite.RenderPlain(self.arena)
+
+        # Set Clock
+        self.keepGoing = True
+        self.counter = 0
+
+
+    def frame_step(self, input_actions):
+
+        reward = 0.1
+        terminal = False
+
+        if sum(input_actions) != 1:
+            raise ValueError('Multiple input actions!')
+
+        screen.blit(background, (0, 0))
+
+        if input_actions[0] == 1: # Move Left
+            player.dx = -10
+        if input_actions[1] == 1: # Move Right
+            player.dx = 10
+        if input_actions[2] == 1: # Shoot
+            self.playerSprite.update(True)
+        else:
+            self.playerSprite.update(False)
+
+        image_data = pygame.surfarray.array3d(pygame.display.get_surface())
+        FPSCLOCK.tick(FPS)
+
+        return image_data, reward, terminal
 
 
 # Load Images
@@ -35,10 +120,7 @@ def load_image(name, colorkey=None):
     return image, image.get_rect()
 
 
-# Sprites
-
 # This class controls the arena background
-
 class Arena(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -55,7 +137,6 @@ class Arena(pygame.sprite.Sprite):
         self.rect.top = -600
 
 
-# Player
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -71,27 +152,16 @@ class Player(pygame.sprite.Sprite):
         self.bombtimer = 0
         self.bombmax = 10
 
-    def update(self):
+    def update(self, fire):
         self.rect.move_ip((self.dx, self.dy))
 
         # Fire the laser
-        key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
+        if fire:
             self.lasertimer = self.lasertimer + 1
             if self.lasertimer == self.lasermax:  # self.ammo > 0:
                 laserSprites.add(Laser(self.rect.midtop))
                 # self.ammo = #self.ammo - 1
                 self.lasertimer = 0
-
-        # Fire the bomb
-        if key[pygame.K_LCTRL]:
-            self.bombtimer = self.bombtimer + 1
-            if self.bombtimer == self.bombmax:
-                self.bombtimer = 0
-                if self.bombamount > 0:
-                    self.bombamount = self.bombamount - 1
-                    score.bomb += -1
-                    bombSprites.add(Bomb(self.rect.midtop))
 
         # Player Boundaries
         if self.rect.left < 0:
@@ -107,9 +177,6 @@ class Player(pygame.sprite.Sprite):
     def reset(self):
         self.rect.bottom = 600
 
-    # Laser class
-
-
 class Laser(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
@@ -121,9 +188,6 @@ class Laser(pygame.sprite.Sprite):
             self.kill()
         else:
             self.rect.move_ip(0, -15)
-
-        # Bomb class
-
 
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -139,8 +203,6 @@ class Bomb(pygame.sprite.Sprite):
         if pygame.sprite.groupcollide(enemySprites, bombSprites, 1, 1):
             bombExplosionSprites.add(BombExplosion(self.rect.center))
 
-
-# Laser class
 class EnemyLaser(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
@@ -152,9 +214,6 @@ class EnemyLaser(pygame.sprite.Sprite):
             self.kill()
         else:
             self.rect.move_ip(0, 15)
-
-        # Enemy class
-
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, centerx):
@@ -312,93 +371,11 @@ class Gameoveresc(pygame.sprite.Sprite):
 
 # Game Module
 def game():
-    # Game Objects
-    global player
-    player = Player()
-    global score
-    score = Score()
-
-    # Game Groups
-
-    # Player/Enemy
-    playerSprite = pygame.sprite.RenderPlain((player))
-
-    global enemySprites
-    enemySprites = pygame.sprite.RenderPlain(())
-    enemySprites.add(Enemy(200))
-    enemySprites.add(Enemy(300))
-    enemySprites.add(Enemy(400))
-
-    # Projectiles
-    global laserSprites
-    laserSprites = pygame.sprite.RenderPlain(())
-
-    global bombSprites
-    bombSprites = pygame.sprite.RenderPlain(())
-    global enemyLaserSprites
-    enemyLaserSprites = pygame.sprite.RenderPlain(())
-
-    # Powerups
-    global bombPowerups
-    bombPowerups = pygame.sprite.RenderPlain(())
-    global shieldPowerups
-    shieldPowerups = pygame.sprite.RenderPlain(())
-
-    # Special FX
-    shieldSprites = pygame.sprite.RenderPlain(())
-
-    global explosionSprites
-    explosionSprites = pygame.sprite.RenderPlain(())
-
-    global bombExplosionSprites
-    bombExplosionSprites = pygame.sprite.RenderPlain(())
-
-    # Score/and game over
-    scoreSprite = pygame.sprite.Group(score)
-    gameOverSprite = pygame.sprite.RenderPlain(())
-
-    # Arena
-    arena = Arena()
-    arena = pygame.sprite.RenderPlain((arena))
-
-    # Set Clock
-    clock = pygame.time.Clock()
-    keepGoing = True
-    counter = 0
-
     # Main Loop
     while keepGoing:
-        clock.tick(30)
-        # input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                keepGoing = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    keepGoing = False
-                elif event.key == pygame.K_LEFT:
-                    player.dx = -10
-                elif event.key == K_RIGHT:
-                    player.dx = 10
-                #elif event.key == K_UP:
-                #    player.dy = -10
-                #elif event.key == K_DOWN:
-                #    player.dy = 10
-            elif event.type == KEYUP:
-                if event.key == K_LEFT:
-                    player.dx = 0
-                elif event.key == K_RIGHT:
-                    player.dx = 0
-               # elif event.key == K_UP:
-                #    player.dy = 0
-                #elif event.key == K_DOWN:
-                #    player.dy = 0
-
         # Update and draw on the screen
 
         # Update
-        screen.blit(background, (0, 0))
-        playerSprite.update()
         enemySprites.update()
         laserSprites.update()
         bombSprites.update()
@@ -473,46 +450,3 @@ def game():
         for hit in pygame.sprite.groupcollide(bombPowerups, playerSprite, 1, 0):
             player.bombamount += 1
             score.bomb += 1
-
-
-# Class Module
-
-
-
-
-# Functions
-
-# Main
-def main():
-    # Arena
-    arena = Arena()
-    arena = pygame.sprite.RenderPlain((arena))
-
-    game()
-
-    clock = pygame.time.Clock()
-    keepGoing = True
-
-    while 1:
-        clock.tick(30)
-
-        # Events
-        events = pygame.event.get()
-
-
-
-        # Quit Event
-        for e in events:
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                return
-
-        # Draw
-        screen.blit(background, (0, 0))
-        arena.update()
-        arena.draw(screen)
-        pygame.display.flip()
-
-
-if __name__ == "__main__":
-    main()
