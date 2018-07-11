@@ -56,7 +56,6 @@ class GameState:
 
         # Score/and game over
         self.scoreSprite = pygame.sprite.Group(score)
-        self.gameOverSprite = pygame.sprite.RenderPlain(())
 
         # Arena
         self.arena = Arena()
@@ -95,7 +94,6 @@ class GameState:
         self.shieldSprites.update()
         self.arena.update()
         self.scoreSprite.update()
-        self.gameOverSprite.update()
 
         # Draw
         self.arena.draw(screen)
@@ -105,7 +103,6 @@ class GameState:
         bombSprites.draw(screen)
         enemyLaserSprites.draw(screen)
         self.scoreSprite.draw(screen)
-        self.gameOverSprite.draw(screen)
         pygame.display.flip()
 
         # Spawn new enemies
@@ -329,14 +326,3 @@ class Score(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (400, 20)
 
-
-class Gameover(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.font = pygame.font.Font("game/data/fonts/planet5.ttf", 48)
-
-    def update(self):
-        self.text = ("GAME OVER")
-        self.image = self.font.render(self.text, 1, (0, 255, 0))
-        self.rect = self.image.get_rect()
-        self.rect.center = (400, 300)
