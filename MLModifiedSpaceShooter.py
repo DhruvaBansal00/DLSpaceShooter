@@ -51,20 +51,8 @@ class GameState:
         global enemyLaserSprites
         enemyLaserSprites = pygame.sprite.RenderPlain(())
 
-        # Powerups
-        global bombPowerups
-        bombPowerups = pygame.sprite.RenderPlain(())
-        global shieldPowerups
-        shieldPowerups = pygame.sprite.RenderPlain(())
-
         # Special FX
         self.shieldSprites = pygame.sprite.RenderPlain(())
-
-        global explosionSprites
-        explosionSprites = pygame.sprite.RenderPlain(())
-
-        global bombExplosionSprites
-        bombExplosionSprites = pygame.sprite.RenderPlain(())
 
         # Score/and game over
         self.scoreSprite = pygame.sprite.Group(score)
@@ -78,10 +66,8 @@ class GameState:
         self.keepGoing = True
         self.counter = 0
 
-
     def frame_step(self, input_actions):
-
-        reward = 0.1
+        reward = 0
         terminal = False
 
         if sum(input_actions) != 1:
@@ -89,14 +75,61 @@ class GameState:
 
         screen.blit(background, (0, 0))
 
-        if input_actions[0] == 1: # Move Left
+        if input_actions[0] == 1:  # Move Left
             player.dx = -10
-        if input_actions[1] == 1: # Move Right
+        if input_actions[1] == 1:  # Move Right
             player.dx = 10
-        if input_actions[2] == 1: # Shoot
+        if input_actions[2] == 1:  # Shoot
             self.playerSprite.update(True)
         else:
             self.playerSprite.update(False)
+
+        # Update and draw on the screen
+
+        # Update
+        for enemy in enemySprites:
+            reward += enemy.update()
+        laserSprites.update()
+        bombSprites.update()
+        enemyLaserSprites.update()
+        self.shieldSprites.update()
+        self.arena.update()
+        self.scoreSprite.update()
+        self.gameOverSprite.update()
+
+        # Draw
+        self.arena.draw(screen)
+        self.playerSprite.draw(screen)
+        enemySprites.draw(screen)
+        laserSprites.draw(screen)
+        bombSprites.draw(screen)
+        enemyLaserSprites.draw(screen)
+        self.scoreSprite.draw(screen)
+        self.gameOverSprite.draw(screen)
+        pygame.display.flip()
+
+        # Spawn new enemies
+        self.counter += 1
+        if self.counter >= 20:
+            enemySprites.add(Enemy(300))
+            self.counter = 0
+
+        # Check if enemy lasers hit player's ship
+        for hit in pygame.sprite.groupcollide(enemyLaserSprites, self.playerSprite, 1, 0):
+            # explosionSprites.add(Shield(player.rect.center))
+            score.shield -= 10
+            reward = -1
+            if score.shield <= 0:
+                terminal = True
+                self.__init__()
+
+        # Check if enemy collides with player
+        for hit in pygame.sprite.groupcollide(enemySprites, self.playerSprite, 1, 0):
+            score.shield -= 10
+            reward = -1
+            if score.shield <= 0:
+                terminal = True
+                self.__init__()
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
         FPSCLOCK.tick(FPS)
@@ -177,6 +210,7 @@ class Player(pygame.sprite.Sprite):
     def reset(self):
         self.rect.bottom = 600
 
+
 class Laser(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
@@ -189,19 +223,6 @@ class Laser(pygame.sprite.Sprite):
         else:
             self.rect.move_ip(0, -15)
 
-class Bomb(pygame.sprite.Sprite):
-    def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image("sprites/bomb.png", -1)
-        self.rect.center = pos
-
-    def update(self):
-        if self.rect.top < 0:
-            self.kill()
-        else:
-            self.rect.move_ip(0, -5)
-        if pygame.sprite.groupcollide(enemySprites, bombSprites, 1, 1):
-            bombExplosionSprites.add(BombExplosion(self.rect.center))
 
 class EnemyLaser(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -215,6 +236,7 @@ class EnemyLaser(pygame.sprite.Sprite):
         else:
             self.rect.move_ip(0, 15)
 
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, centerx):
         pygame.sprite.Sprite.__init__(self)
@@ -224,6 +246,7 @@ class Enemy(pygame.sprite.Sprite):
         self.reset()
 
     def update(self):
+        reward = 0
         self.rect.centerx += self.dx
         self.rect.centery += self.dy
         if self.rect.top > screen.get_height():
@@ -236,18 +259,11 @@ class Enemy(pygame.sprite.Sprite):
 
         # Laser Collisions
         if pygame.sprite.groupcollide(enemySprites, laserSprites, 1, 1):
-            #explosionSprites.add(EnemyExplosion(self.rect.center))
+            # explosionSprites.add(EnemyExplosion(self.rect.center))
             score.score += 10
+            reward = 1
 
-        # Bomb Collisions
-        if pygame.sprite.groupcollide(enemySprites, bombSprites, 1, 1):
-            bombExplosionSprites.add(BombExplosion(self.rect.center))
-            score.score += 10
-
-        # Bomb Explosion Collisions
-        if pygame.sprite.groupcollide(enemySprites, bombExplosionSprites, 1, 0):
-            #explosionSprites.add(EnemyExplosion(self.rect.center))
-            score.score += 10
+        return reward
 
     def reset(self):
         self.rect.bottom = 0
@@ -282,37 +298,6 @@ class EnemyExplosion(pygame.sprite.Sprite):
         self.counter = self.counter + 1
         if self.counter == self.maxcount:
             self.kill()
-
-
-class BombExplosion(pygame.sprite.Sprite):
-    def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image("sprites/bombexplosion.png", -1)
-        self.rect.center = pos
-        self.counter = 0
-        self.maxcount = 5
-
-    def update(self):
-        self.counter = self.counter + 1
-        if self.counter == self.maxcount:
-            self.kill()
-
-
-# Bomb Powerup
-class BombPowerup(pygame.sprite.Sprite):
-    def __init__(self, centerx):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image("sprites/torpedopowerup.png", -1)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = random.randrange(0, screen.get_width())
-
-    def update(self):
-        if self.rect.top > screen.get_height():
-            self.kill
-        else:
-            self.rect.move_ip(0, 6)
-
-        # Shield Powerup
 
 
 class ShieldPowerup(pygame.sprite.Sprite):
@@ -355,98 +340,3 @@ class Gameover(pygame.sprite.Sprite):
         self.image = self.font.render(self.text, 1, (0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.center = (400, 300)
-
-
-class Gameoveresc(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.font = pygame.font.Font("game/data/fonts/arial.ttf", 28)
-
-    def update(self):
-        self.text = "PRESS ESC TO RETURN"
-        self.image = self.font.render(self.text, 1, (0, 255, 0))
-        self.rect = self.image.get_rect()
-        self.rect.center = (400, 400)
-
-
-# Game Module
-def game():
-    # Main Loop
-    while keepGoing:
-        # Update and draw on the screen
-
-        # Update
-        enemySprites.update()
-        laserSprites.update()
-        bombSprites.update()
-        enemyLaserSprites.update()
-        bombPowerups.update()
-        shieldPowerups.update()
-        shieldSprites.update()
-        explosionSprites.update()
-        bombExplosionSprites.update()
-        arena.update()
-        scoreSprite.update()
-        gameOverSprite.update()
-
-        # Draw
-        arena.draw(screen)
-        playerSprite.draw(screen)
-        enemySprites.draw(screen)
-        laserSprites.draw(screen)
-        bombSprites.draw(screen)
-        enemyLaserSprites.draw(screen)
-        bombPowerups.draw(screen)
-        shieldPowerups.draw(screen)
-        shieldSprites.draw(screen)
-        explosionSprites.draw(screen)
-        bombExplosionSprites.draw(screen)
-        scoreSprite.draw(screen)
-        gameOverSprite.draw(screen)
-        pygame.display.flip()
-
-        # Spawn new enemies
-        counter += 1
-        if counter >= 20:
-            enemySprites.add(Enemy(300))
-            counter = 0
-
-        # Spawn Shield Power up
-        # shieldPowerupcounter += 1
-        spawnShieldpowerup = random.randint(1, 500)
-        if spawnShieldpowerup == 1:
-            shieldPowerups.add(ShieldPowerup(300))
-
-        # Spawn Bomb Power up
-        spawnBombpowerup = random.randint(1, 500)
-        if spawnBombpowerup == 1:
-            bombPowerups.add(BombPowerup(300))
-            bombPowerupcounter = 0
-
-        # Check if enemy lasers hit player's ship
-        for hit in pygame.sprite.groupcollide(enemyLaserSprites, playerSprite, 1, 0):
-            explosionSprites.add(Shield(player.rect.center))
-            score.shield -= 10
-            if score.shield <= 0:
-                gameOverSprite.add(Gameover())
-                gameOverSprite.add(Gameoveresc())
-                playerSprite.remove(player)
-
-        # Check if enemy collides with player
-        for hit in pygame.sprite.groupcollide(enemySprites, playerSprite, 1, 0):
-            explosionSprites.add(Shield(player.rect.center))
-            score.shield -= 10
-            if score.shield <= 0:
-                gameOverSprite.add(Gameover())
-                gameOverSprite.add(Gameoveresc())
-                playerSprite.remove(player)
-
-        # Check if player collides with shield powerup
-        for hit in pygame.sprite.groupcollide(shieldPowerups, playerSprite, 1, 0):
-            if score.shield < 100:
-                score.shield += 10
-
-        # Check if player collides with bomb powerup
-        for hit in pygame.sprite.groupcollide(bombPowerups, playerSprite, 1, 0):
-            player.bombamount += 1
-            score.bomb += 1
