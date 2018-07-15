@@ -91,10 +91,6 @@ def trainNetwork(s, readout, h_fc1, sess):
     # store the previous observations in replay memory
     D = deque()
 
-    # printing
-    a_file = open("logs_" + GAME + "/readout.txt", 'w')
-    h_file = open("logs_" + GAME + "/hidden.txt", 'w')
-
     # get the first state by doing nothing and preprocess the image to 80x80x4
     do_nothing = np.zeros(ACTIONS)
     do_nothing[0] = 1
@@ -102,7 +98,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
     ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
     s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
-
+    t = 0
     # saving and loading networks
     saver = tf.train.Saver()
     sess.run(tf.initialize_all_variables())
@@ -110,12 +106,14 @@ def trainNetwork(s, readout, h_fc1, sess):
     if checkpoint and checkpoint.model_checkpoint_path:
         saver.restore(sess, checkpoint.model_checkpoint_path)
         print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        str = checkpoint.model_checkpoint_path.split("-")
+        t = int(str[2])
     else:
         print("Could not find old network weights")
 
     # start training
     epsilon = INITIAL_EPSILON
-    t = 0
+    tf.global_variables_initializer()
     while  True:
         # choose an action epsilon greedily
         readout_t = readout.eval(feed_dict={s : [s_t]})[0]
