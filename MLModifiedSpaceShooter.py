@@ -23,6 +23,8 @@ pygame.mouse.set_visible(0)
 background = pygame.Surface(screen.get_size())
 background = background.convert()
 background.fill((0, 0, 0))
+GameNum = 0
+file = open("scorelog.txt", "w", 1)
 
 
 class GameState:
@@ -52,14 +54,11 @@ class GameState:
         enemyLaserSprites = pygame.sprite.RenderPlain(())
 
         # Special FX
-        self.shieldSprites = pygame.sprite.RenderPlain(())
+        # self.shieldSprites = pygame.sprite.RenderPlain(())
 
         # Score/and game over
-        self.scoreSprite = pygame.sprite.Group(score)
+        # self.scoreSprite = pygame.sprite.Group(score)
 
-        # Arena
-        self.arena = Arena()
-        self.arena = pygame.sprite.RenderPlain(self.arena)
 
         # Set Clock
         self.keepGoing = True
@@ -68,6 +67,8 @@ class GameState:
     def frame_step(self, input_actions):
         reward = 0
         terminal = False
+        global GameNum
+        global file
 
         if sum(input_actions) != 1:
             raise ValueError('Multiple input actions!')
@@ -91,18 +92,16 @@ class GameState:
         laserSprites.update()
         bombSprites.update()
         enemyLaserSprites.update()
-        self.shieldSprites.update()
-        self.arena.update()
-        self.scoreSprite.update()
+       # self.shieldSprites.update()
+       # self.scoreSprite.update()
 
         # Draw
-        self.arena.draw(screen)
         self.playerSprite.draw(screen)
         enemySprites.draw(screen)
         laserSprites.draw(screen)
         bombSprites.draw(screen)
         enemyLaserSprites.draw(screen)
-        self.scoreSprite.draw(screen)
+        # self.scoreSprite.draw(screen)
         pygame.display.flip()
 
         # Spawn new enemies
@@ -115,16 +114,20 @@ class GameState:
         for hit in pygame.sprite.groupcollide(enemyLaserSprites, self.playerSprite, 1, 0):
             # explosionSprites.add(Shield(player.rect.center))
             score.shield -= 10
-            reward = -1
+            reward = -10
             if score.shield <= 0:
+                GameNum = GameNum + 1
+                file.write(str(GameNum) + " " + str(score.score) + "\n")
                 terminal = True
                 self.__init__()
 
         # Check if enemy collides with player
         for hit in pygame.sprite.groupcollide(enemySprites, self.playerSprite, 1, 0):
             score.shield -= 10
-            reward = -1
+            reward = -10
             if score.shield <= 0:
+                GameNum = GameNum + 1
+                file.write(str(GameNum) + " " + str(score.score) + "\n")
                 terminal = True
                 self.__init__()
 
@@ -149,22 +152,6 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey, RLEACCEL)
     return image, image.get_rect()
 
-
-# This class controls the arena background
-class Arena(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image("menu/arena.jpg", -1)
-        self.dy = 5
-        self.reset()
-
-    def update(self):
-        self.rect.bottom += self.dy
-        if self.rect.bottom >= 1200:
-            self.reset()
-
-    def reset(self):
-        self.rect.top = -600
 
 
 class Player(pygame.sprite.Sprite):
