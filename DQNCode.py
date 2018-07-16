@@ -8,7 +8,7 @@ import MLModifiedSpaceShooter as game
 from collections import deque
 
 GAME = 'spaceShooter' # the name of the game being played for log files
-ACTIONS = 4 # number of valid actions   1. Do Nothing 2. Move Left 3. Move Right 4. Shoot Missiles  (TBH I am not sure about the exact order but "Do nothing" is probably the 1st)
+ACTIONS = 4 # number of valid actions   1. Move Left 2. Move Right 3. Shoot Missiles 4. Do Nothing
 GAMMA = 0.95 # decay rate of past observations changed temporarily
 OBSERVE = 10000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
@@ -131,7 +131,7 @@ def trainNetwork(s, readout, h_fc1, sess):
                 action_index = np.argmax(readout_t)
                 a_t[action_index] = 1
         else:
-            a_t[0] = 1 # do nothing
+            a_t[3] = 1 # do nothing
 
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
