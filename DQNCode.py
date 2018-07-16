@@ -10,10 +10,10 @@ from collections import deque
 GAME = 'spaceShooter' # the name of the game being played for log files
 ACTIONS = 4 # number of valid actions   1. Do Nothing 2. Move Left 3. Move Right 4. Shoot Missiles  (TBH I am not sure about the exact order but "Do nothing" is probably the 1st)
 GAMMA = 0.95 # decay rate of past observations changed temporarily
-OBSERVE = 100000. # timesteps to observe before training
+OBSERVE = 10000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 1 # starting value of epsilon  changed temporarily
+INITIAL_EPSILON = 0.1 # starting value of epsilon  changed temporarily
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
@@ -86,7 +86,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     train_step = tf.train.AdamOptimizer(1e-6).minimize(cost)
 
     # open up a game state to communicate with emulator
-    game_state = game.GameState()  # not sure if GameState is a function in game (MLModifiedSpaceShooter) though
+    game_state = game.GameState()
 
     # store the previous observations in replay memory
     D = deque()
@@ -112,6 +112,9 @@ def trainNetwork(s, readout, h_fc1, sess):
         print("Could not find old network weights")
 
     # start training
+    tempt = t
+    t = 0
+    setAlready = False
     epsilon = INITIAL_EPSILON
     tf.global_variables_initializer()
     while  True:
@@ -146,6 +149,10 @@ def trainNetwork(s, readout, h_fc1, sess):
         D.append((s_t, a_t, r_t, s_t1, terminal))
         if len(D) > REPLAY_MEMORY:
             D.popleft()
+        if t >= OBSERVE and not setAlready:
+            if t < tempt:
+                t = tempt
+            setAlready = True
 
         # only train if done observing
         if t > OBSERVE:
