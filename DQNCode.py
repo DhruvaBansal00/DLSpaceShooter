@@ -10,10 +10,10 @@ from collections import deque
 GAME = 'spaceShooter' # the name of the game being played for log files
 ACTIONS = 4 # number of valid actions   1. Do Nothing 2. Move Left 3. Move Right 4. Shoot Missiles  (TBH I am not sure about the exact order but "Do nothing" is probably the 1st)
 GAMMA = 0.95 # decay rate of past observations changed temporarily
-OBSERVE = 100000. # timesteps to observe before training
-EXPLORE = 2000000. # frames over which to anneal epsilon
+OBSERVE = 10000. # timesteps to observe before training
+EXPLORE = 200000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 1 # starting value of epsilon  changed temporarily
+INITIAL_EPSILON = 0.10 # starting value of epsilon  changed temporarily
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
