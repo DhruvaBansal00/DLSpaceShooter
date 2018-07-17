@@ -13,11 +13,12 @@ GAMMA = 0.95 # decay rate of past observations changed temporarily
 OBSERVE = 10000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 0.1 # starting value of epsilon  changed temporarily
+INITIAL_EPSILON = 0.1 # starting value of epsilon  changed temporarily  TIMESTEP 633864 / STATE explore / EPSILON 0.06883804315168396 / ACTION 1 / REWARD 0 / Q_MAX 7.633744e-01
+
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
-
+log = open("DQNlog.txt", "w", 1)
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.01)
@@ -101,13 +102,13 @@ def trainNetwork(s, readout, h_fc1, sess):
     t = 0
     # saving and loading networks
     saver = tf.train.Saver()
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     checkpoint = tf.train.get_checkpoint_state("saved_networks")
     if checkpoint and checkpoint.model_checkpoint_path:
         saver.restore(sess, checkpoint.model_checkpoint_path)
         print("Successfully loaded:", checkpoint.model_checkpoint_path)
-        str = checkpoint.model_checkpoint_path.split("-")
-        t = int(str[2])
+        check = checkpoint.model_checkpoint_path.split("-")
+        t = int(check[2])
     else:
         print("Could not find old network weights")
 
@@ -124,7 +125,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         action_index = 0
         if t % FRAME_PER_ACTION == 0:
             if random.random() <= epsilon:
-                print("----------Random Action----------")
+                log.write("----------Random Action----------"+"\n")
                 action_index = random.randrange(ACTIONS)
                 a_t[random.randrange(ACTIONS)] = 1
             else:
@@ -198,10 +199,7 @@ def trainNetwork(s, readout, h_fc1, sess):
             state = "explore"
         else:
             state = "train"
-
-        print("TIMESTEP", t, "/ STATE", state, \
-            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
-            "/ Q_MAX %e" % np.max(readout_t))
+        log.write("TIMESTEP " + str(t) + " / STATE " + state + " / EPSILON "+ str(epsilon) + " / ACTION " + str(action_index)+" / REWARD " + str(r_t) + " / Q_MAX " + str(np.max(readout_t))+"\n")
         # write info to files
         '''
         if t % 10000 <= 100:
