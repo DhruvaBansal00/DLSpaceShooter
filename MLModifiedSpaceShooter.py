@@ -6,7 +6,7 @@ import pygame
 import random
 from pygame.locals import *
 
-FPS = 30
+FPS = 100
 SCREENWIDTH  = 800
 SCREENHEIGHT = 600
 
@@ -25,7 +25,7 @@ background = background.convert()
 background.fill((0, 0, 0))
 GameNum = 0
 file = open("scorelog.txt", "w", 1)
-
+avg = 0
 
 class GameState:
     def __init__(self):
@@ -64,11 +64,22 @@ class GameState:
         self.keepGoing = True
         self.counter = 0
 
+    def game_o(self):
+        global GameNum
+        global file
+        global avg
+        GameNum = GameNum + 1
+        file.write(str(GameNum) + " " + str(score.score) + "\n")
+        avg = avg + score.score
+        if GameNum % 20 == 0:
+            print(avg / 20)
+            avg = 0
+        self.__init__()
+
+
     def frame_step(self, input_actions):
         reward = 0
         terminal = False
-        global GameNum
-        global file
 
         if sum(input_actions) != 1:
             raise ValueError('Multiple input actions!')
@@ -116,19 +127,16 @@ class GameState:
             score.shield -= 10
             reward = -10
             if score.shield <= 0:
-                GameNum = GameNum + 1
-                file.write(str(GameNum) + " " + str(score.score) + "\n")
+                self.game_o()
                 terminal = True
-                self.__init__()
+
 
         # Check if enemy collides with player
         for hit in pygame.sprite.groupcollide(enemySprites, self.playerSprite, 1, 0):
             score.shield -= 10
             reward = -10
             if score.shield <= 0:
-                GameNum = GameNum + 1
-                file.write(str(GameNum) + " " + str(score.score) + "\n")
-                terminal = True
+                self.game_o()
                 self.__init__()
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
