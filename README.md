@@ -14,28 +14,35 @@ We specifically used a method called Q-learning which uses a Q(s,a) to approxima
 
 Given a run of the Markov decision process, reward R can be calculated as:
 
+![](https://latex.codecogs.com/svg.latex?R%20%3D%20r_1&plus;r_2&plus;r_3&plus;......r_n)
+
 Given this, total reward from a point t can be calculated as:
+
+![](https://latex.codecogs.com/svg.latex?R_t%20%3D%20r_t&plus;r_%7Bt&plus;1%7D&plus;r_%7Bt&plus;2%7D&plus;....&plus;r_n)
 
 Due to a stochastic environment, there is a high possibility the rewards diverge the more into future we go. Hence, using a discount factor Y between 0 and 1, we reduce the weightage of the reward the more into future it is. Hence the new discounted future reward is:
 
+![](https://latex.codecogs.com/svg.latex?R_t%20%3D%20r_t&plus;%5Cgamma%20r_%7Bt&plus;1%7D&plus;%5Cgamma%5E2r_%7Bt&plus;2%7D&plus;...%5Cgamma%5E%7Bn-t%7Dr_n)
+
 This can also be expressed as:
 
+![](https://latex.codecogs.com/svg.latex?R_t%20%3D%20r_t&plus;%5Cgamma%28r_%7Bt&plus;1%7D&plus;%5Cgamma%28r_%7Bt&plus;2%7D%29&plus;...%29%29%20%3D%20r_t&plus;%5Cgamma%20r_%7Bt&plus;1%7D)
+
 Using the above expression for Q(s,a) and the Bellman equation:
+
+![](https://latex.codecogs.com/svg.latex?Q%28s_t%2Ca_t%29%20%3D%20r&plus;%5Cgamma%20max_%7Ba_%7Bt&plus;1%7D%7D%20Q%28s_%7Bt&plus;1%7D%2Ca_%7Bt&plus;1%7D%29)
 
 We iteratively approximate the maximum future reward for this state.
 
 Q-learning algorithm:
 
 *Initialize Q[num_states, num_actions] arbitrarily*
-
 *Observe initial state s*
-
 *Repeat*
-
-*	Select and carry out an action a *
-
-*	Observe reward r and new state s’*
-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select and carry out an action a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Observe reward r and new state s’
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](https://latex.codecogs.com/svg.latex?Q%5Bs%2C%20a%5D%20%3D%20Q%5Bs%2C%20a%5D%20&plus;%20%5Calpha%28r%20&plus;%20%5Cgamma%20max_%7Ba%27%7D%28r%20&plus;%20%5Cgamma%20max_%7Ba%27%7D%20Q%5Bs%27%2C%20a%27%5D%20-%20Q%5Bs%2C%20a%5D%20%29)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](https://latex.codecogs.com/svg.latex?s%20%3D%20s%27)
 *Until terminated*
 
 # 3. Methods
@@ -105,4 +112,3 @@ We experimented with various reward schemes and the most optimal results were fo
 
 The game used in this project is a modified version of Space Shooter (based on the retro space shooter game) by Tyler Gray
 [https://www.pygame.org/project-Space+Shooter-1292-.html](https://www.pygame.org/project-Space+Shooter-1292-.html)
-
