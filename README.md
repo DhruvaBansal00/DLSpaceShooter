@@ -37,12 +37,19 @@ We iteratively approximate the maximum future reward for this state.
 Q-learning algorithm:
 
 *Initialize Q[num_states, num_actions] arbitrarily*
+
 *Observe initial state s*
+
 *Repeat*
+
 *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select and carry out an action a*
+
 *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Observe reward r and new state s’*
+
 *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](https://latex.codecogs.com/svg.latex?Q%5Bs%2C%20a%5D%20%3D%20Q%5Bs%2C%20a%5D%20&plus;%20%5Calpha%28r%20&plus;%20%5Cgamma%20max_%7Ba%27%7D%28r%20&plus;%20%5Cgamma%20max_%7Ba%27%7D%20Q%5Bs%27%2C%20a%27%5D%20-%20Q%5Bs%2C%20a%5D%20%29)*
+
 *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](https://latex.codecogs.com/svg.latex?s%20%3D%20s%27)*
+
 *Until terminated*
 
 # 3. Methods
