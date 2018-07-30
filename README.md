@@ -4,7 +4,7 @@
 
 # 1. Abstract
 
-We use a Deep Q Network introduced by the pioneering paper by DeepMind: [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf) to teach the computer a variation of the Space Shooter game. The aim is to learn the game without any guided input by learning directly from the game screen, given the same inputs a human would receive to learn the game. By doing so, we aim to test the generalizability of the algorithm to more complicated problems and to test its limitations. We found that the network showed improvements with training and performed better than random, but failed to reach human level in the limited amount of training we could perform.  
+We use a Deep Q Network introduced in the pioneering paper by DeepMind: [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf) to teach the computer a variation of the Space Shooter game. The aim is to learn the game without any guided input by learning directly from the game screen, given the same inputs a human would receive to learn the game. By doing so, we aim to test the generalizability of the algorithm to more complicated problems and to test its limitations. We found that the network showed improvements with training and performed better than random, but failed to reach human level in the limited amount of training we could perform.  
 
 # 2. Background
 
